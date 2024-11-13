@@ -1,0 +1,57 @@
+/* Ensure this file is imported in LoadingScreen.js */
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.door {
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  background-color: #333; /* Door color */
+  transition: transform 1s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.left-door {
+  left: 0;
+  transform: translateX(0%);
+}
+
+.right-door {
+  right: 0;
+  transform: translateX(0%);
+}
+
+.loading-screen.loaded .left-door {
+  transform: translateX(-100%);
+}
+
+.loading-screen.loaded .right-door {
+  transform: translateX(100%);
+}
+
+.spinner {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #999;
+  border-top: 5px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 10000;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
