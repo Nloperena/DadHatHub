@@ -4,17 +4,19 @@
 /node_modules
 /.pnp
 .pnp.js
+/backend/node_modules
 
 # testing
 /coverage
 
 # production
 /build
+/backend/build
 
 # misc
 .DS_Store
 
-# environment variables
+# root environment variables
 .env
 .env.local
 .env.development
@@ -23,6 +25,16 @@
 .env.test.local
 .env.production
 .env.production.local
+
+# backend environment variables
+/backend/.env
+/backend/.env.local
+/backend/.env.development
+/backend/.env.development.local
+/backend/.env.test
+/backend/.env.test.local
+/backend/.env.production
+/backend/.env.production.local
 
 # logs
 npm-debug.log*
