@@ -9,10 +9,12 @@ const ProductCard = ({ product }) => {
     addToCart(product, 1);
   };
 
-  // Extract details from product data
-  const productImage = product.images?.[0]?.src || 'default_image_url';
-  const productName = product.title || 'Product Name';
-  const productPrice = product.variants?.[0]?.price / 100 || 0; // Price might be in cents, so divide by 100
+  // Access product data
+  const productImage = product.thumbnail_url || 'default_image_url';
+  const productName = product.name || 'Product Name';
+  
+  // Check if the price is in product.variants[0].price and convert it from cents to dollars if necessary
+  const productPrice = product.variants?.[0]?.price ? (product.variants[0].price / 100).toFixed(2) : '0.00';
 
   return (
     <div className="bg-[#593C8F] rounded-xl shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-2xl">
@@ -26,7 +28,7 @@ const ProductCard = ({ product }) => {
           {productName}
         </h3>
         <p className="text-xl font-medium text-[#8EF9F3] mb-4">
-          ${productPrice.toFixed(2)}
+          ${productPrice}
         </p>
         <Link to={`/product/${product.id}`}>
           <button className="px-6 py-2 bg-[#DB5461] text-white font-semibold rounded-full hover:bg-[#171738] transition-all duration-300 transform hover:scale-110 mb-4">
