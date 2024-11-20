@@ -1,129 +1,75 @@
-// frontend/src/pages/ShopPage.js
-
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import SearchBar from '../components/SearchBar';
-import Filter from '../components/Filter';
-import Sort from '../components/Sort';
-import Pagination from '../components/Pagination';
 import ProductCard from '../components/ProductCard';
 
 const ShopPage = () => {
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [products, setProducts] = useState([]); // Original list of products
+  const [filteredProducts, setFilteredProducts] = useState([]); // Filtered and sorted products
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [sortOption, setSortOption] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   const productsPerPage = 6;
 
-  // Fetch products from the backend API
   useEffect(() => {
     const fetchProducts = async () => {
+      if (products.length > 0) return; // Prevent re-fetching if data already exists
       try {
-        const response = await axios.get('http://localhost:5000/api/products');
-        console.log("API Response:", response.data); // Log the API response to check structure
-        setProducts(response.data.result); // Assuming products are under `result`
-        setFilteredProducts(response.data.result); // Set initial filtered products
+        const response = await fetch('http://localhost:5000/api/products');
+        const data = await response.json();
+
+        console.log('API Response:', data);
+
+        if (data.products) {
+          setProducts(data.products);
+          setFilteredProducts(data.products); // Initialize filtered products
+        } else {
+          console.error('No products found in response:', data);
+        }
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
-        setLoading(false);
+        setLoading(false); // Stop loading spinner
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [products]); // Dependency array ensures this runs only when products change
 
-  // Filter and sort products
-  useEffect(() => {
-    let updatedProducts = products
-      .filter((product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .filter((product) =>
-        selectedCategory ? product.category === selectedCategory : true
-      );
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Sorting logic
-    if (sortOption === 'priceLowHigh') {
-      updatedProducts.sort((a, b) => a.variants[0].price - b.variants[0].price);
-    } else if (sortOption === 'priceHighLow') {
-      updatedProducts.sort((a, b) => b.variants[0].price - a.variants[0].price);
-    } else if (sortOption === 'nameAsc') {
-      updatedProducts.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortOption === 'nameDesc') {
-      updatedProducts.sort((a, b) => b.name.localeCompare(a.name));
-    }
-
-    setFilteredProducts(updatedProducts);
-  }, [products, searchTerm, selectedCategory, sortOption]);
-
-  // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-    setCurrentPage(1);
-  };
-
-  const handleCategoryChange = (event) => {
-    setSelectedCategory(event.target.value);
-    setCurrentPage(1);
-  };
-
-  const handleSortChange = (event) => {
-    setSortOption(event.target.value);
-  };
-
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
 
   if (loading) return <p>Loading products...</p>;
-  if (!loading && products.length === 0) return <p>No products available or failed to load.</p>;
+  if (!loading && products.length === 0) return <p>No products available.</p>;
 
   return (
     <div className="bg-purple min-h-screen">
       <section className="max-w-6xl mx-auto p-8 text-white">
-        <h1 className="text-5xl font-bold mb-2 text-pink text-center">
-          Welcome to Our Shop
-        </h1>
-        <p className="text-xl mb-8 text-cyan text-center">
-          Explore our exclusive collection of hats
-        </p>
+        <h1 className="text-5xl font-bold mb-2 text-pink text-center">Welcome to Our Shop</h1>
+        <p className="text-xl mb-8 text-cyan text-center">Explore our exclusive collection of hats</p>
 
-        <SearchBar searchTerm={searchTerm} onSearchChange={handleSearchChange} />
-        <div className="flex flex-col md:flex-row md:space-x-4 mb-6">
-          <Filter
-            categories={[...new Set(products.map((product) => product.category || 'Others'))]}
-            selectedCategory={selectedCategory}
-            onSelectCategory={handleCategoryChange}
-          />
-          <Sort sortOption={sortOption} onSortChange={handleSortChange} />
-        </div>
-        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {currentProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
-
-        {totalPages > 1 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        )}
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === Math.ceil(filteredProducts.length / productsPerPage)}
+            className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
+          >
+            Next
+          </button>
+        </div>
       </section>
     </div>
   );

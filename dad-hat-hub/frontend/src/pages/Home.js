@@ -26,11 +26,6 @@ const Home = () => {
       <section className="py-16 px-8">
         <Testimonials />
       </section>
-
-      {/* Related Products Section */}
-      <section className="bg-purple-900">
-        <RelatedProducts />
-      </section>
     </section>
   );
 };

@@ -5,65 +5,103 @@ import { useCart } from '../context/CartContext';
 import Carousel from '../components/Carousel';
 
 const ProductPage = () => {
-  const { productId } = useParams();
-  const [product, setProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1);
-  const { addToCart } = useCart();
+  const { productId } = useParams(); // Product ID from route params
+  const [product, setProduct] = useState(null); // Product data
+  const [quantity, setQuantity] = useState(1); // Quantity selector
+  const { addToCart } = useCart(); // Access cart context
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/products/${productId}`);
-        console.log("Product Data:", response.data); // Log to inspect the response structure
-        setProduct(response.data.result); // Assuming `result` holds the main product data
+        console.log("Fetched Product Data:", response.data);
+
+        if (response.data.result) {
+          setProduct(response.data.result); // Set product data
+        } else {
+          console.error('Product data not found in response.');
+          setProduct(null); // Graceful fallback
+        }
       } catch (error) {
         console.error('Error fetching product:', error);
+        setProduct(null); // Graceful fallback on error
       }
     };
 
     fetchProduct();
   }, [productId]);
 
-  // Show loading message if the product data hasn't loaded yet
-  if (!product) return <p className="text-center">Loading product...</p>;
+  // Handle case when product is null
+  if (product === null) {
+    return (
+      <section className="bg-navy min-h-screen p-8 text-white">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-cyan-500">Product Not Found</h1>
+          <p className="text-lg text-gray-200 mt-4">
+            We couldn't find the product you're looking for. Please try again later.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
-  // Access product details from `sync_product` and pricing from the first variant in `sync_variants`
-  const productImage = product.sync_product?.thumbnail_url || 'default_image_url';
-  const productName = product.sync_product?.name || 'Product Name';
-  const productDescription = product.sync_product?.description || 'No description available';
-  const productPrice = product.sync_variants?.[0]?.price ? (product.sync_variants[0].price / 100).toFixed(2) : '0.00';
+  // Handle case when product is still loading
+  if (!product) {
+    return <p className="text-center">Loading product...</p>;
+  }
+
+  // Safely access product details
+  const productImage =
+    product.sync_variants?.[0]?.product?.image ||
+    product.thumbnail_url ||
+    'https://via.placeholder.com/150';
+  const productName = product.name || 'Product Name';
+  const productDescription =
+    product.sync_variants?.[0]?.product?.name || 'No description available';
+  const productPrice =
+    product.sync_variants?.[0]?.retail_price
+      ? parseFloat(product.sync_variants[0].retail_price).toFixed(2)
+      : '0.00';
 
   const handleQuantityChange = (e) => {
-    setQuantity(Math.max(1, parseInt(e.target.value) || 1));
+    const value = Math.max(1, parseInt(e.target.value) || 1);
+    setQuantity(value);
   };
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    if (!product.sync_variants || product.sync_variants.length === 0) {
+      alert('Product variant not available.');
+      return;
+    }
+
+    const variant = product.sync_variants[0]; // Select the first variant as default
+    const productToAdd = {
+      id: variant.id, // Use the variant ID for the cart item
+      name: productName,
+      image: productImage,
+      price: parseFloat(productPrice), // Ensure price is a number
+      quantity,
+    };
+
+    addToCart(productToAdd); // Add product to cart
   };
 
   return (
     <section className="bg-navy min-h-screen p-8 text-white">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-start gap-8">
         <div className="w-full md:w-1/2 space-y-4">
-          {/* Pass the product image to Carousel as an array */}
-          <Carousel images={productImage ? [productImage] : []} />
+          <Carousel images={product.sync_variants?.[0]?.files.map((file) => file.preview_url) || [productImage]} />
         </div>
 
         <div className="md:w-1/2 bg-purple-800 p-8 rounded-lg shadow-md">
-          {/* Display product name */}
           <h1 className="text-4xl font-bold text-cyan-500 mb-4">{productName}</h1>
-          
-          {/* Display product price */}
-          <p className="text-2xl font-semibold text-cyan-300 mb-6">
-            ${productPrice}
-          </p>
-          
-          {/* Display product description */}
+          <p className="text-2xl font-semibold text-cyan-300 mb-6">${productPrice}</p>
           <p className="text-lg text-gray-200 leading-relaxed mb-8">{productDescription}</p>
 
-          {/* Quantity selector */}
           <div className="mb-4 flex items-center space-x-4">
-            <label htmlFor="quantity" className="text-lg font-medium text-white">Quantity:</label>
+            <label htmlFor="quantity" className="text-lg font-medium text-white">
+              Quantity:
+            </label>
             <input
               type="number"
               id="quantity"
@@ -73,7 +111,6 @@ const ProductPage = () => {
             />
           </div>
 
-          {/* Add to Cart button */}
           <button
             onClick={handleAddToCart}
             className="px-8 py-3 bg-cyan-500 text-navy font-semibold rounded-lg shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105"

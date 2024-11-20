@@ -1,12 +1,35 @@
-// src/components/Footer.js
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 
 const Footer = () => {
+  const footerRef = useRef(null);
+  const [isAnchored, setIsAnchored] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsAnchored(entry.isIntersecting); // Update state when footer is in view
+      },
+      { threshold: 1.0 } // Trigger when fully visible
+    );
+
+    if (footerRef.current) {
+      observer.observe(footerRef.current);
+    }
+
+    return () => {
+      if (footerRef.current) observer.unobserve(footerRef.current);
+    };
+  }, []);
+
   return (
-    <footer className="bg-navy text-white py-10 px-8">
+    <footer
+      ref={footerRef}
+      className={`bg-navy text-white py-10 px-8 ${
+        isAnchored ? 'fixed bottom-0 left-0 w-full' : ''
+      }`}
+    >
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
-        
         {/* Quick Links */}
         <div className="mb-6 md:mb-0">
           <h4 className="text-xl font-semibold mb-4">Quick Links</h4>
