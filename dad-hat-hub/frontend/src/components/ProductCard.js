@@ -6,26 +6,20 @@ const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
 
   const handleAddToCart = () => {
-    // Check if product has sync_variants and use its ID if available
-    const variantId =
-      product.sync_variants && product.sync_variants.length > 0
-        ? product.sync_variants[0].id
-        : product.id; // Fallback to product ID if no variants
-
-    const productToAdd = {
-      id: variantId, // Always use a valid ID
-      name: product.name,
-      image: product.thumbnail_url || 'https://via.placeholder.com/150',
-      price: product.price,
-      quantity: 1,
-    };
-
-    if (!variantId) {
-      alert('Product variant not available');
+    if (!product.variant_id) {
+      alert('Product variant_id is not available');
       return;
     }
 
-    addToCart(productToAdd);
+    // Add the product to the cart with all necessary details
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      thumbnail_url: product.thumbnail_url, // Ensure this is included
+      variant_id: product.variant_id,
+      quantity: 1,
+    });
   };
 
   return (

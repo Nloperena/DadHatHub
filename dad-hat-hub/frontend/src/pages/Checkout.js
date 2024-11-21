@@ -18,34 +18,46 @@ const Checkout = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Handles input changes for customer information
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCustomerInfo((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Submits the checkout request
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMessage('');
-
+  
     try {
-      // Call the backend API to create a Stripe session
-      const response = await fetch('http://localhost:5000/api/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cart, customerInfo }),
-      });
+      // Checkout.js - handleSubmit function
+  const response = await fetch('http://localhost:5000/api/stripe/create-checkout-session', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    cart: cart.map((item) => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      variant_id: item.variant_id,
+      thumbnail_url: item.thumbnail_url, // Include thumbnail_url here
+    })),
+    customerInfo,
+  }),
+});
 
+
+  
       if (!response.ok) {
         throw new Error(`API returned status ${response.status}`);
       }
-
+  
       const { id } = await response.json();
-
-      // Redirect to Stripe Checkout
       const stripe = await stripePromise;
       const { error } = await stripe.redirectToCheckout({ sessionId: id });
-
+  
       if (error) {
         setErrorMessage(error.message);
       }
@@ -56,13 +68,14 @@ const Checkout = () => {
       setIsSubmitting(false);
     }
   };
+  
 
   return (
     <div className="max-w-lg mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
       <h1 className="text-2xl font-bold mb-4">Checkout</h1>
-      {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
+      {errorMessage && <p className="text-red-500 mb-4"><strong>Error:</strong> {errorMessage}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Customer Information */}
+        {/* Customer Information Fields */}
         <input
           type="text"
           name="name"
