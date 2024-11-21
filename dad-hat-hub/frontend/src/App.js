@@ -18,6 +18,7 @@ function App() {
           <Route path="/product/:productId" element={<ProductPage />} /> {/* Correct Route for ProductPage */}
           <Route path="/checkout" element={<Checkout />} />
         </Routes>
+        <Footer />
       </div>
     </Router>
   );

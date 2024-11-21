@@ -7,14 +7,16 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        red: '#DB5461',       // Indian red
-        pink: '#FFD9CE',      // Pale Dogwood
-        purple: {
-          DEFAULT: '#593C8F', // Base color for purple
-          '700': '#4b327a',   // Darker shade for purple hover state
-        },
-        cyan: '#8EF9F3',      // Ice blue
-        navy: '#171738',      // Space cadet
+        primary: '#2F2504',      // Dark drab brown
+        secondary: '#594E36',    // Light drab brown
+        accent: '#7E846B',       // Accent color
+        background: '#A5AE9E',   // Ash gray
+        textcolor: '#D0DDD7',    // Platinum
+      },
+      boxShadow: {
+        'inset-sm': 'inset 0 1px 2px rgba(0, 0, 0, 0.05)',
+        'inset-md': 'inset 0 4px 6px rgba(0, 0, 0, 0.1)',
+        'inset-lg': 'inset 0 10px 15px rgba(0, 0, 0, 0.15)',
       },
     },
   },

@@ -9,7 +9,7 @@ const SearchBar = ({ searchTerm, onSearchChange }) => {
         placeholder="Search hats..."
         value={searchTerm}
         onChange={onSearchChange}
-        className="w-full p-2 rounded-lg text-black"
+        className="w-full p-3 rounded-full bg-white text-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent border-2 border-accent shadow-md"
       />
     </div>
   );

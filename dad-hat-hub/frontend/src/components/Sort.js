@@ -7,7 +7,7 @@ const Sort = ({ sortOption, onSortChange }) => {
       <select
         value={sortOption}
         onChange={onSortChange}
-        className="w-full p-2 rounded-lg text-black"
+        className="w-full p-3 rounded-full bg-white text-primary focus:outline-none focus:ring-2 focus:ring-accent border-2 border-accent shadow-md"
       >
         <option value="">Sort By</option>
         <option value="priceLowHigh">Price: Low to High</option>

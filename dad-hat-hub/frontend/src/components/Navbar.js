@@ -22,20 +22,20 @@ const Navbar = () => {
   return (
     <>
       {/* Sticky Navbar */}
-      <nav className="fixed top-0 left-0 w-full bg-purple-900 text-white p-4 flex justify-between items-center shadow-lg z-10">
+      <nav className="fixed top-0 left-0 w-full bg-primary text-textcolor p-4 flex justify-between items-center shadow-lg z-10">
         <div className="font-bold text-xl md:text-2xl lg:text-3xl">
-          <Link to="/">Dad Hat Hub</Link>
+          <Link to="/" className="hover:text-accent">Dad Hat Hub</Link>
         </div>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex space-x-8">
-          <Link to="/" className="hover:text-cyan-500">Home</Link>
-          <Link to="/shop" className="hover:text-cyan-500">Shop</Link>
-          <Link to="/checkout" className="hover:text-cyan-500">Checkout</Link>
-          <button onClick={toggleCart} className="relative">
+        <div className="hidden md:flex space-x-8 items-center">
+          <Link to="/" className="hover:text-accent">Home</Link>
+          <Link to="/shop" className="hover:text-accent">Shop</Link>
+          <Link to="/checkout" className="hover:text-accent">Checkout</Link>
+          <button onClick={toggleCart} className="relative focus:outline-none">
             <FaShoppingCart size={24} />
             {cartItemCount > 0 && (
-              <span className="absolute -top-2 -right-4 bg-black bg-opacity-70 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+              <span className="absolute -top-2 -right-4 bg-secondary text-textcolor text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
                 {cartItemCount}
               </span>
             )}
@@ -44,10 +44,10 @@ const Navbar = () => {
 
         {/* Mobile Cart Icon and Menu Icon */}
         <div className="md:hidden flex items-center space-x-4">
-          <button onClick={toggleCart} className="relative">
+          <button onClick={toggleCart} className="relative focus:outline-none">
             <FaShoppingCart size={24} />
             {cartItemCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-black bg-opacity-70 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-2 -right-2 bg-secondary text-textcolor text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 {cartItemCount}
               </span>
             )}
@@ -59,10 +59,10 @@ const Navbar = () => {
 
         {/* Mobile Menu Links */}
         {isMobileMenuOpen && (
-          <div className="absolute top-16 left-0 w-full bg-purple-800 text-white py-4 space-y-4 flex flex-col items-center md:hidden">
-            <Link to="/" onClick={toggleMobileMenu} className="hover:text-cyan-500">Home</Link>
-            <Link to="/shop" onClick={toggleMobileMenu} className="hover:text-cyan-500">Shop</Link>
-            <Link to="/checkout" onClick={toggleMobileMenu} className="hover:text-cyan-500">Checkout</Link>
+          <div className="absolute top-16 left-0 w-full bg-primary text-textcolor py-4 space-y-4 flex flex-col items-center md:hidden">
+            <Link to="/" onClick={toggleMobileMenu} className="hover:text-accent">Home</Link>
+            <Link to="/shop" onClick={toggleMobileMenu} className="hover:text-accent">Shop</Link>
+            <Link to="/checkout" onClick={toggleMobileMenu} className="hover:text-accent">Checkout</Link>
           </div>
         )}
       </nav>

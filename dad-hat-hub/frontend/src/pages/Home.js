@@ -13,19 +13,19 @@ const Home = () => {
       <Hero />
 
       {/* About Section */}
-      <section className="py-16 px-8 bg-purple-900 text-gray-200">
+      
         <AboutSection />
-      </section>
+      
 
       {/* Featured Products Section */}
-      <section className="py-16 px-8">
+      
         <FeaturedProducts />
-      </section>
+      
 
       {/* Customer Testimonials */}
-      <section className="py-16 px-8">
+      
         <Testimonials />
-      </section>
+     
     </section>
   );
 };

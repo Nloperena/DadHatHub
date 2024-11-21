@@ -6,15 +6,15 @@
 /* Interactive button styles */
 @layer components {
   .interactive-button {
-    @apply px-8 py-3 rounded bg-purple text-white transform transition-transform duration-300;
+    @apply px-8 py-3 rounded bg-secondary text-textcolor transform transition-transform duration-300;
   }
 
   .interactive-button:hover {
-    @apply bg-purple-700 scale-105;
+    @apply bg-primary scale-105;
     transform: perspective(600px) rotateX(10deg) scale(1.05);
   }
 }
 
 body {
-  @apply bg-purple;
+  @apply bg-background;
 }

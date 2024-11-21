@@ -1,3 +1,4 @@
+// src/components/ProductCard.js
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -11,44 +12,41 @@ const ProductCard = ({ product }) => {
       return;
     }
 
-    // Add the product to the cart with all necessary details
     addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
-      thumbnail_url: product.thumbnail_url, // Ensure this is included
+      thumbnail_url: product.thumbnail_url,
       variant_id: product.variant_id,
       quantity: 1,
     });
   };
 
   return (
-    <div className="bg-gradient-to-b from-[#171738] to-[#593C8F] rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 transform hover:scale-105 p-4">
-      <div className="relative w-full h-48 flex items-center justify-center overflow-hidden rounded-lg bg-[#FFFFFF10]">
+    <div className="group relative bg-background rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+      {/* Product Image */}
+      <Link to={`/product/${product.id}`}>
         <img
           src={product.thumbnail_url || 'https://via.placeholder.com/150'}
           alt={product.name}
-          className="w-full h-full object-contain"
+          className="w-full h-64 object-cover"
         />
-      </div>
-      <div className="mt-4 text-center">
-        <h3 className="text-xl font-bold text-[#FFD9CE]">{product.name}</h3>
-        <p className="text-lg text-[#8EF9F3] mt-2">
-          ${product.price ? (product.price / 100).toFixed(2) : 'Price Unavailable'}
-        </p>
-      </div>
-      <div className="flex justify-center mt-6 space-x-4">
-        <Link to={`/product/${product.id}`}>
-          <button className="bg-[#DB5461] text-white px-4 py-2 rounded-full hover:bg-[#FFD9CE] hover:text-[#593C8F] transition duration-300">
-            View Details
+      </Link>
+
+      {/* Overlay with Product Details */}
+      <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="p-4">
+          <h3 className="text-xl font-bold text-textcolor">{product.name}</h3>
+          <p className="text-lg text-textcolor">
+            ${product.price ? (product.price / 100).toFixed(2) : 'Price Unavailable'}
+          </p>
+          <button
+            onClick={handleAddToCart}
+            className="mt-4 bg-primary text-textcolor px-4 py-2 rounded-full hover:bg-secondary transition-colors duration-300"
+          >
+            Add to Cart
           </button>
-        </Link>
-        <button
-          onClick={handleAddToCart}
-          className="bg-[#8EF9F3] text-[#171738] px-4 py-2 rounded-full hover:bg-[#FFD9CE] hover:text-[#593C8F] transition duration-300"
-        >
-          Add to Cart
-        </button>
+        </div>
       </div>
     </div>
   );

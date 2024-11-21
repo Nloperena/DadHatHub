@@ -3,21 +3,29 @@ import React from 'react';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   return (
-    <div className="flex justify-center mt-6">
+    <div className="flex justify-center mt-8 space-x-2">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-3 py-1 mx-1 bg-purple-800 text-white rounded"
+        className={`px-4 py-2 text-textcolor font-bold rounded-full transition-all duration-300 ${
+          currentPage === 1
+            ? 'bg-gray-400 cursor-not-allowed'
+            : 'bg-primary hover:bg-secondary'
+        }`}
       >
         Previous
       </button>
-      <span className="px-3 py-1 mx-1">
+      <span className="flex items-center px-3 py-1">
         Page {currentPage} of {totalPages}
       </span>
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-3 py-1 mx-1 bg-purple-800 text-white rounded"
+        className={`px-4 py-2 text-textcolor font-bold rounded-full transition-all duration-300 ${
+          currentPage === totalPages
+            ? 'bg-gray-400 cursor-not-allowed'
+            : 'bg-primary hover:bg-secondary'
+        }`}
       >
         Next
       </button>
