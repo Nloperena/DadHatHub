@@ -1,4 +1,3 @@
-// src/components/Checkout.js
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { useCart } from '../context/CartContext';
@@ -82,36 +81,6 @@ const Checkout = () => {
           <h1 className="text-3xl font-bold mb-2">Secure Checkout</h1>
           <p className="text-base">Complete your purchase by providing your payment details.</p>
         </div>
-        {/* Progress Indicator */}
-        <div className="absolute bottom-0 left-0 w-full">
-          <div className="flex justify-center items-center mb-2">
-            <div className="flex items-center">
-              {/* Step 1 */}
-              <div className="flex items-center">
-                <div className="w-5 h-5 rounded-full bg-accent text-primary flex items-center justify-center font-bold text-xs">
-                  1
-                </div>
-                <span className="text-xs ml-2 text-textcolor">Cart</span>
-              </div>
-              <div className="h-1 w-8 bg-accent mx-1"></div>
-              {/* Step 2 */}
-              <div className="flex items-center">
-                <div className="w-5 h-5 rounded-full bg-accent text-primary flex items-center justify-center font-bold text-xs">
-                  2
-                </div>
-                <span className="text-xs ml-2 text-textcolor">Checkout</span>
-              </div>
-              <div className="h-1 w-8 bg-textcolor mx-1"></div>
-              {/* Step 3 */}
-              <div className="flex items-center">
-                <div className="w-5 h-5 rounded-full bg-textcolor text-primary flex items-center justify-center font-bold text-xs">
-                  3
-                </div>
-                <span className="text-xs ml-2 text-textcolor">Confirmation</span>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {errorMessage && (
@@ -119,13 +88,14 @@ const Checkout = () => {
           <strong>Error:</strong> {errorMessage}
         </p>
       )}
+
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Cart Summary */}
         <div className="w-full lg:w-1/2 bg-primary text-background p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-3 text-textcolor">Order Summary</h2>
           <div className="space-y-3">
             {cart.map((item) => (
-              <div key={item.id} className="flex items-center">
+              <div key={`${item.id}-${item.variant_id}`} className="flex items-center">
                 <img
                   src={item.thumbnail_url || 'https://via.placeholder.com/80'}
                   alt={item.name}
@@ -133,7 +103,8 @@ const Checkout = () => {
                 />
                 <div className="flex-1">
                   <h3 className="text-base font-semibold text-textcolor">{item.name}</h3>
-                  <p className="text-textcolor text-sm">Quantity: {item.quantity}</p>
+                  <p className="text-sm text-secondary">Variant: {item.variant}</p>
+                  <p className="text-sm text-secondary">Quantity: {item.quantity}</p>
                 </div>
                 <p className="text-base font-bold text-textcolor">
                   ${(item.price * item.quantity / 100).toFixed(2)}

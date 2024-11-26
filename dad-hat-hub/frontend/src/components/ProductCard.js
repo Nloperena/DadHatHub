@@ -1,4 +1,3 @@
-// src/components/ProductCard.js
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -40,12 +39,22 @@ const ProductCard = ({ product }) => {
           <p className="text-lg text-textcolor">
             ${product.price ? (product.price / 100).toFixed(2) : 'Price Unavailable'}
           </p>
+
+          {/* Add to Cart Button */}
           <button
             onClick={handleAddToCart}
             className="mt-4 bg-primary text-textcolor px-4 py-2 rounded-full hover:bg-secondary transition-colors duration-300"
           >
             Add to Cart
           </button>
+
+          {/* View Details Button */}
+          <Link
+            to={`/product/${product.id}`}
+            className="mt-4 bg-secondary text-textcolor px-4 py-2 rounded-full inline-block hover:bg-primary transition-colors duration-300 text-center"
+          >
+            View Details
+          </Link>
         </div>
       </div>
     </div>

@@ -9,9 +9,8 @@ const CartDrawer = ({ isOpen, toggleCart }) => {
 
   return (
     <div
-      className={`fixed inset-y-0 right-0 w-full max-w-md bg-background text-textcolor shadow-lg transform transition-transform duration-300 z-50 ${
-        isOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}
+      className={`fixed inset-y-0 right-0 w-full max-w-md bg-background text-textcolor shadow-lg transform transition-transform duration-300 z-50 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
       style={{ borderLeft: '4px solid #7E846B' }} // Added left border
     >
       <div className="flex justify-between items-center p-4 border-b-4 border-secondary">
@@ -29,7 +28,7 @@ const CartDrawer = ({ isOpen, toggleCart }) => {
         <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 150px)' }}>
           {cart.map((item) => (
             <div
-              key={item.id}
+              key={`${item.id}-${item.variant_id}`}
               className="flex items-center bg-secondary bg-opacity-20 p-4 rounded-lg mb-4 border-l-4 border-accent"
             >
               <img
@@ -39,19 +38,25 @@ const CartDrawer = ({ isOpen, toggleCart }) => {
               />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-primary">{item.name}</h3>
+                <p className="text-sm text-primary">Variant: {item.variant}</p>
                 <p className="text-lg text-primary font-bold">
                   ${item.price ? (item.price / 100).toFixed(2) : 'N/A'}
                 </p>
                 <p className="text-sm text-primary">Quantity: {item.quantity}</p>
               </div>
               <button
-                onClick={() => removeFromCart(item.id)}
+                onClick={() => removeFromCart(item.id, item.variant_id)}
                 className="text-red-500 hover:text-red-400 transition-colors ml-4"
               >
-                <FaTrash size={18} />
+                Remove
               </button>
             </div>
           ))}
+
+
+
+
+
           <Link to="/checkout">
             <button
               onClick={toggleCart}

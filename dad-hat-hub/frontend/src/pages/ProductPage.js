@@ -1,125 +1,143 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import { useCart } from '../context/CartContext';
-import Carousel from '../components/Carousel';
 
 const ProductPage = () => {
-  const { productId } = useParams(); // Product ID from route params
-  const [product, setProduct] = useState(null); // Product data
-  const [quantity, setQuantity] = useState(1); // Quantity selector
-  const { addToCart } = useCart(); // Access cart context
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const { addToCart } = useCart();
+
+  // Map variant names to colors
+  const variantColors = {
+    Black: '#000000',
+    Navy: '#001F54',
+    Cranberry: '#B22222',
+    Spruce: '#2E8B57',
+    'Dark Grey': '#A9A9A9',
+    'Green Camo': '#556B2F',
+    Khaki: '#F0E68C',
+    Stone: '#D3D3D3',
+    Pink: '#FFC0CB',
+    'Light Blue': '#ADD8E6',
+    White: '#FFFFFF',
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
+      console.log(`Fetching product with ID: ${id}`);
       try {
-        const response = await axios.get(`http://localhost:5000/api/products/${productId}`);
-        console.log("Fetched Product Data:", response.data);
+        const response = await fetch(`http://localhost:5000/api/products/${id}`);
+        const data = await response.json();
 
-        if (response.data.result) {
-          setProduct(response.data.result); // Set product data
-        } else {
-          console.error('Product data not found in response.');
-          setProduct(null); // Graceful fallback
+        console.log('Fetched product data:', data);
+
+        setProduct(data);
+
+        if (data.variants && data.variants.length > 0) {
+          console.log('Default Variant:', data.variants[0]);
+          setSelectedVariant(data.variants[0]);
         }
       } catch (error) {
         console.error('Error fetching product:', error);
-        setProduct(null); // Graceful fallback on error
       }
     };
-
     fetchProduct();
-  }, [productId]);
+  }, [id]);
 
-  // Handle case when product is null
-  if (product === null) {
-    return (
-      <section className="bg-navy min-h-screen p-8 text-white">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-cyan-500">Product Not Found</h1>
-          <p className="text-lg text-gray-200 mt-4">
-            We couldn't find the product you're looking for. Please try again later.
-          </p>
-        </div>
-      </section>
-    );
-  }
-
-  // Handle case when product is still loading
-  if (!product) {
-    return <p className="text-center">Loading product...</p>;
-  }
-
-  // Safely access product details
-  const productImage =
-    product.sync_variants?.[0]?.product?.image ||
-    product.thumbnail_url ||
-    'https://via.placeholder.com/150';
-  const productName = product.name || 'Product Name';
-  const productDescription =
-    product.sync_variants?.[0]?.product?.name || 'No description available';
-  const productPrice =
-    product.sync_variants?.[0]?.retail_price
-      ? parseFloat(product.sync_variants[0].retail_price).toFixed(2)
-      : '0.00';
-
-  const handleQuantityChange = (e) => {
-    const value = Math.max(1, parseInt(e.target.value) || 1);
-    setQuantity(value);
+  const handleVariantChange = (variant) => {
+    console.log('Selected Variant:', variant);
+    setSelectedVariant(variant); // Update the selected variant and image
   };
 
   const handleAddToCart = () => {
-    if (!product.sync_variants || product.sync_variants.length === 0) {
-      alert('Product variant not available.');
+    if (!selectedVariant) {
+      alert('No variant selected.');
       return;
     }
 
-    const variant = product.sync_variants[0]; // Select the first variant as default
-    const productToAdd = {
-      id: variant.id, // Use the variant ID for the cart item
-      name: productName,
-      image: productImage,
-      price: parseFloat(productPrice), // Ensure price is a number
-      quantity,
-    };
+    addToCart({
+      id: product.id,
+      name: product.name,
+      variant: selectedVariant.name.split(' / ')[1], // Only the color
+      price: selectedVariant.price,
+      thumbnail_url: selectedVariant.thumbnail_url || product.thumbnail_url,
+      variant_id: selectedVariant.id,
+      quantity: 1,
+    });
 
-    addToCart(productToAdd); // Add product to cart
+    console.log('Added to Cart:', {
+      id: product.id,
+      name: product.name,
+      variant: selectedVariant.name.split(' / ')[1],
+      price: selectedVariant.price,
+      thumbnail_url: selectedVariant.thumbnail_url || product.thumbnail_url,
+      variant_id: selectedVariant.id,
+    });
   };
 
+  if (!product) {
+    return <p>Loading product details...</p>;
+  }
+
   return (
-    <section className="bg-navy min-h-screen p-8 text-white">
-      <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-start gap-8">
-        <div className="w-full md:w-1/2 space-y-4">
-          <Carousel images={product.sync_variants?.[0]?.files.map((file) => file.preview_url) || [productImage]} />
-        </div>
+    <div className="max-w-4xl mx-auto p-6 bg-background text-textcolor rounded-lg shadow-lg">
+      <div className="flex flex-col md:flex-row">
+        {/* Product Image */}
+        <img
+          src={selectedVariant?.thumbnail_url || product.thumbnail_url || 'https://via.placeholder.com/300'}
+          alt={product.name}
+          className="w-full md:w-1/2 rounded-lg object-cover shadow-md"
+        />
 
-        <div className="md:w-1/2 bg-purple-800 p-8 rounded-lg shadow-md">
-          <h1 className="text-4xl font-bold text-cyan-500 mb-4">{productName}</h1>
-          <p className="text-2xl font-semibold text-cyan-300 mb-6">${productPrice}</p>
-          <p className="text-lg text-gray-200 leading-relaxed mb-8">{productDescription}</p>
+        {/* Product Details */}
+        <div className="flex flex-col p-4">
+          <h1 className="text-4xl font-bold text-primary mb-4">{product.name}</h1> {/* Product name */}
+          <p className="text-lg text-secondary mb-4">{product.description}</p>
+          <p className="text-2xl font-semibold mb-6">
+            ${selectedVariant ? (selectedVariant.price / 100).toFixed(2) : 'Price Unavailable'}
+          </p>
 
-          <div className="mb-4 flex items-center space-x-4">
-            <label htmlFor="quantity" className="text-lg font-medium text-white">
-              Quantity:
-            </label>
-            <input
-              type="number"
-              id="quantity"
-              value={quantity}
-              onChange={handleQuantityChange}
-              className="w-16 p-2 border border-cyan-500 rounded-lg text-center text-navy focus:outline-none focus:ring-2 focus:ring-cyan-500"
-            />
+          {/* Variant Selector */}
+          <div className="variant-selector mb-6">
+            <h3 className="text-lg font-semibold mb-2">Choose Variant:</h3>
+            <div className="flex flex-wrap gap-3">
+              {product.variants.map((variant) => {
+                const colorName = variant.name.split(' / ')[1]; // Extract the color name
+                const backgroundColor = variantColors[colorName] || '#CCCCCC'; // Fallback color
+
+                return (
+                  <button
+                    key={variant.id}
+                    className={`p-2 border-2 rounded-lg ${
+                      selectedVariant?.id === variant.id ? 'border-primary' : 'border-secondary'
+                    }`}
+                    style={{
+                      backgroundColor: selectedVariant?.id === variant.id ? backgroundColor : '#F8F9FA', // Default background when not selected
+                      color: selectedVariant?.id === variant.id ? '#FFFFFF' : '#000000', // White text when selected
+                    }}
+                    onClick={() => handleVariantChange(variant)}
+                  >
+                    {colorName}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
+          {/* Add to Cart Button */}
           <button
             onClick={handleAddToCart}
-            className="px-8 py-3 bg-cyan-500 text-navy font-semibold rounded-lg shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105"
+            className={`mt-6 px-6 py-3 rounded-lg text-white ${
+              selectedVariant ? 'bg-primary hover:bg-secondary' : 'bg-gray-500 cursor-not-allowed'
+            }`}
+            disabled={!selectedVariant}
           >
             Add to Cart
           </button>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

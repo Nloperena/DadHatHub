@@ -96,6 +96,41 @@ app.get('/api/products', async (req, res) => {
 });
 
 /**
+ * Fetch specific product details by ID from Printful.
+ */
+app.get('/api/products/:id', async (req, res) => {
+  const productId = req.params.id;
+  console.log(`Fetching product with ID: ${productId}`);
+
+  try {
+    const response = await axios.get(`https://api.printful.com/store/products/${productId}`, {
+      headers: { Authorization: `Bearer ${PRINTFUL_API_KEY}` },
+    });
+
+    const product = response.data.result;
+
+    const productDetails = {
+      id: product.sync_product.id, // Correctly map product ID
+      name: product.sync_product.name, // Correctly map product name
+      description: product.sync_product.description || 'No description available',
+      thumbnail_url: product.sync_product.thumbnail_url,
+      variants: product.sync_variants.map((variant) => ({
+        id: variant.id,
+        name: variant.name, // Only variant name
+        price: parseFloat(variant.retail_price) * 100,
+        thumbnail_url: variant.files?.find((file) => file.type === 'preview')?.preview_url || null,
+      })),
+    };
+
+    console.log('Processed Product Details:', productDetails); // Debug log
+    res.status(200).json(productDetails);
+  } catch (error) {
+    console.error(`Error fetching product with ID ${productId}:`, error.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * Create Stripe Checkout session.
  */
 app.post('/api/stripe/create-checkout-session', async (req, res) => {
@@ -109,11 +144,11 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
           name: item.name,
           images: [item.thumbnail_url],
           metadata: {
-            variant_id: item.variant_id, // Pass variant_id in metadata
-            product_id: item.id,         // Pass product_id for Printful
+            variant_id: item.variant_id,
+            product_id: item.id,
           },
         },
-        unit_amount: item.price, // Ensure price is in cents
+        unit_amount: item.price,
       },
       quantity: item.quantity,
     }));
@@ -128,8 +163,7 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
       shipping_address_collection: {
         allowed_countries: ['US', 'CA'],
       },
-      billing_address_collection: 'required', // To collect billing address
-      // Note: Removed 'customer' parameter since it expects a customer ID
+      billing_address_collection: 'required',
     });
 
     res.status(200).json({ id: session.id });
