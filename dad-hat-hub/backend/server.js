@@ -27,26 +27,37 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
  * Webhook endpoint to handle Stripe events.
  * Must be defined before body parsing middleware.
  */
+// Webhook endpoint
 app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
   const sig = req.headers['stripe-signature'];
 
   let event;
   try {
+    // Validate and construct the Stripe event
     event = stripeClient.webhooks.constructEvent(req.body, sig, endpointSecret);
+    console.log('Webhook Verified:', event);
+
+    // Handle specific event types
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      console.log('Payment successful:', session);
+      handleCheckoutSessionCompleted(session);
+    } else {
+      console.log(`Unhandled event type: ${event.type}`);
+    }
+
+    res.status(200).send('Webhook received!');
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    handleCheckoutSessionCompleted(session);
-  } else {
-    console.warn(`Unhandled event type: ${event.type}`);
-  }
-
-  res.status(200).end();
 });
+
+// Apply JSON parsing middleware only AFTER the webhook route
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
 
 // Apply body parsing middleware for other routes
 app.use(express.json());
