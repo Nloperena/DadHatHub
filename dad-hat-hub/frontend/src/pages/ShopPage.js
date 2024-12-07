@@ -17,11 +17,17 @@ const ShopPage = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      if (products.length > 0) return; // Prevent re-fetching if data already exists
       try {
-        const response = await fetch('http://localhost:5000/api/products');
-        const data = await response.json();
+        const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+        console.log('ShopPage API_BASE_URL:', API_BASE_URL); // Debugging
 
+        const response = await fetch(`${API_BASE_URL}/api/products`);
+        if (!response.ok) {
+          console.error('Error fetching products:', response.statusText);
+          return;
+        }
+
+        const data = await response.json();
         console.log('API Response:', data);
 
         if (data.products) {
@@ -38,21 +44,22 @@ const ShopPage = () => {
     };
 
     fetchProducts();
-  }, [products]); // Dependency array ensures this runs only when products change
+  }, []); // Run once on component mount
 
   // Handle Search and Sort
   useEffect(() => {
     let filtered = products;
 
+    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter((product) =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // Handle Sort
+    // Handle Sorting
     if (sortOption) {
-      filtered = [...filtered]; // Create a new array to sort
+      filtered = [...filtered]; // Create a new array before sorting
       switch (sortOption) {
         case 'priceLowHigh':
           filtered.sort((a, b) => a.price - b.price);
@@ -91,7 +98,6 @@ const ShopPage = () => {
     <div className="min-h-screen bg-background text-textcolor">
       {/* Header Section */}
       <section className="relative overflow-hidden py-8 md:py-12 flex flex-col items-center">
-        {/* Wave Background */}
         <div className="absolute inset-0 -z-10">
           {/* Add your SVG background here if desired */}
         </div>
