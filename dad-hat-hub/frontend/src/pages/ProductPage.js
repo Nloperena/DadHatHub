@@ -25,9 +25,10 @@ const ProductPage = () => {
 
   useEffect(() => {
     const fetchProduct = async () => {
+      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; // Use environment variable for backend URL
       console.log(`Fetching product with ID: ${id}`);
       try {
-        const response = await fetch(`http://localhost:5000/api/products/${id}`);
+        const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
         const data = await response.json();
 
         console.log('Fetched product data:', data);

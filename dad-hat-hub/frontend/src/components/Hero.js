@@ -5,9 +5,19 @@ const Hero = () => {
 
   useEffect(() => {
     // Fetch products from your API
-    fetch('http://localhost:5000/api/products')
-      .then((response) => response.json())
+    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; // Use environment variable for backend URL
+    console.log('API_BASE_URL:', API_BASE_URL); // Debugging: Ensure the environment variable is loaded
+
+    fetch(`${API_BASE_URL}/api/products`)
+      .then((response) => {
+        console.log('Raw Response:', response); // Debugging: Log the raw response
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => {
+        console.log('Fetched Data:', data); // Debugging: Log the fetched data
         if (data.products && data.products.length > 0) {
           // Pick a random product
           const randomIndex = Math.floor(Math.random() * data.products.length);
@@ -16,7 +26,7 @@ const Hero = () => {
         }
       })
       .catch((error) => {
-        console.error('Error fetching products:', error);
+        console.error('Error fetching products:', error); // Debugging: Log any errors
       });
   }, []);
 
