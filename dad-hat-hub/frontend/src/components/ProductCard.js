@@ -1,61 +1,116 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
 
+  // If variants aren't provided, fall back to a single default variant
+  const variants = product.variants && product.variants.length > 0 
+    ? product.variants 
+    : [{ 
+        variant_id: product.variant_id || 'default', 
+        name: product.name, 
+        price: product.price, 
+        thumbnail_url: product.thumbnail_url 
+      }];
+
+  const [currentVariantIndex, setCurrentVariantIndex] = useState(0);
+
+  useEffect(() => {
+    // Reset to first variant if product changes
+    setCurrentVariantIndex(0);
+  }, [product]);
+
+  const currentVariant = variants[currentVariantIndex];
+
   const handleAddToCart = () => {
-    if (!product.variant_id) {
+    if (!currentVariant.variant_id) {
       alert('Product variant_id is not available');
       return;
     }
 
     addToCart({
       id: product.id,
-      name: product.name,
-      price: product.price,
-      thumbnail_url: product.thumbnail_url,
-      variant_id: product.variant_id,
+      name: currentVariant.name,
+      price: currentVariant.price,
+      thumbnail_url: currentVariant.thumbnail_url,
+      variant_id: currentVariant.variant_id,
       quantity: 1,
     });
   };
 
+  const handlePrevVariant = (e) => {
+    e.stopPropagation();
+    setCurrentVariantIndex((prev) => 
+      prev === 0 ? variants.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextVariant = (e) => {
+    e.stopPropagation();
+    setCurrentVariantIndex((prev) =>
+      (prev + 1) % variants.length
+    );
+  };
+
   return (
-    <div className="group relative bg-background rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-      {/* Product Image */}
-      <Link to={`/product/${product.id}`}>
-        <img
-          src={product.thumbnail_url || 'https://via.placeholder.com/150'}
-          alt={product.name}
-          className="w-full h-64 object-cover"
-        />
-      </Link>
+    <div
+      className="relative w-full bg-white border border-black rounded-lg p-4 transition-transform duration-300 hover:scale-105 hover:-rotate-1"
+      style={{ transformOrigin: 'center center' }}
+    >
+      <div className="relative w-full flex items-center justify-center mb-4">
+        {/* If multiple variants, show arrows */}
+        {variants.length > 1 && (
+          <>
+            <button
+              onClick={handlePrevVariant}
+              className="absolute left-0 px-2 py-1 bg-black text-white font-bold rounded-l"
+            >
+              &larr;
+            </button>
+            <button
+              onClick={handleNextVariant}
+              className="absolute right-0 px-2 py-1 bg-black text-white font-bold rounded-r"
+            >
+              &rarr;
+            </button>
+          </>
+        )}
 
-      {/* Overlay with Product Details */}
-      <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <div className="p-4">
-          <h3 className="text-xl font-bold text-textcolor">{product.name}</h3>
-          <p className="text-lg text-textcolor">
-            ${product.price ? (product.price / 100).toFixed(2) : 'Price Unavailable'}
-          </p>
+        {/* Product Image */}
+        <Link to={`/product/${product.id}`} className="block">
+          <img
+            src={currentVariant.thumbnail_url || 'https://via.placeholder.com/150'}
+            alt={currentVariant.name}
+            className="w-full h-auto object-contain max-h-64"
+            style={{ maxHeight: '16rem' }} // Ensures a consistent image height area
+          />
+        </Link>
+      </div>
 
-          {/* Add to Cart Button */}
-          <button
-            onClick={handleAddToCart}
-            className="mt-4 bg-primary text-textcolor px-4 py-2 rounded-full hover:bg-secondary transition-colors duration-300"
-          >
-            Add to Cart
-          </button>
+      {/* Product Info */}
+      <h3 className="text-lg font-semibold text-black mb-2">
+        {currentVariant.name}
+      </h3>
+      <p className="text-base text-black mb-4">
+        {currentVariant.price ? `$${(currentVariant.price / 100).toFixed(2)}` : 'Price Unavailable'}
+      </p>
 
-          {/* View Details Button */}
-          <Link
-            to={`/product/${product.id}`}
-            className="mt-4 bg-secondary text-textcolor px-4 py-2 rounded-full inline-block hover:bg-primary transition-colors duration-300 text-center"
-          >
-            View Details
-          </Link>
-        </div>
+      {/* Actions */}
+      <div className="flex space-x-2">
+        <button
+          onClick={handleAddToCart}
+          className="px-3 py-1 border border-black bg-white font-semibold hover:bg-black hover:text-white transition-colors duration-300"
+        >
+          Add to Cart
+        </button>
+        <Link
+          to={`/product/${product.id}`}
+          className="px-3 py-1 border border-black bg-white font-semibold hover:bg-black hover:text-white transition-colors duration-300"
+        >
+          View Details
+        </Link>
       </div>
     </div>
   );

@@ -25,20 +25,23 @@ const Checkout = () => {
   const tax = Math.round(subTotal * taxRate);
   const total = subTotal + shipping + tax;
 
-  // Handles input changes for customer information
+  // Handle input changes for customer information
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCustomerInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Submits the checkout request
+  // Submit the checkout request
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMessage('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/stripe/create-checkout-session', {
+      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+      console.log('Checkout API_BASE_URL:', API_BASE_URL); // Debugging
+
+      const response = await fetch(`${API_BASE_URL}/api/stripe/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

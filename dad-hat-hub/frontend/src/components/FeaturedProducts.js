@@ -9,9 +9,10 @@ const FeaturedProducts = () => {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/products');
+        const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+        const response = await axios.get(`${API_BASE_URL}/api/products`);
         console.log("Featured Products Data:", response.data);
-        setFeaturedProducts(response.data.products.slice(0, 3)); // Adjusted based on the actual API structure
+        setFeaturedProducts(response.data.products.slice(0, 3));
       } catch (error) {
         console.error('Error fetching featured products:', error);
       }
@@ -21,13 +22,32 @@ const FeaturedProducts = () => {
   }, []);
 
   return (
-    <section className="py-12 px-4 sm:py-16 sm:px-8 bg-background text-textcolor">
-      <h2 className="text-3xl sm:text-4xl font-bold text-primary mb-8 text-center">
+    <section 
+      className="py-12 px-4 sm:py-16 sm:px-8 relative"
+      style={{
+        background: '#A5AE9E', // Ash Gray background
+        color: '#2F2504',     // Dark Drab Brown text
+      }}
+    >
+      <h2 
+        className="text-5xl sm:text-6xl font-extrabold mb-8 text-center"
+        style={{
+          // No drop shadow now
+        }}
+      >
         Featured Products
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {featuredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <div
+            key={product.id}
+            className="relative bg-white p-4 rounded-lg border border-black"
+            style={{
+              // Reduced border size (just a thin 1px border now, no heavy shadow)
+            }}
+          >
+            <ProductCard product={product} />
+          </div>
         ))}
       </div>
     </section>

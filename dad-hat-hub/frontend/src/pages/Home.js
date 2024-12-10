@@ -24,7 +24,7 @@ const Home = () => {
 
       {/* Customer Testimonials */}
       
-        <Testimonials />
+    
      
     </section>
   );
