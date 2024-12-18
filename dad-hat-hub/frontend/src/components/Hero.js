@@ -1,4 +1,6 @@
+// src/components/Hero.js
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 const Hero = () => {
   const [products, setProducts] = useState([]);
@@ -6,6 +8,7 @@ const Hero = () => {
 
   useEffect(() => {
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+    console.log("API Base URL:", API_BASE_URL);
 
     fetch(`${API_BASE_URL}/api/products`)
       .then((response) => {
@@ -34,14 +37,41 @@ const Hero = () => {
 
   const currentProduct = products[currentProductIndex];
 
+  // Framer Motion Variants
+  const containerVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: [0.25, 0.1, 0.25, 1] // Cubic-bezier for smooth easing
+      }
+    }
+  };
+
+  const productVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: [0.25, 0.1, 0.25, 1],
+        delay: 0.2
+      }
+    }
+  };
+
   return (
     <section
-      className="relative overflow-hidden text-textcolor py-16 md:py-32 flex flex-col md:flex-row items-center"
+      className="relative overflow-hidden py-16 md:py-32 flex flex-col md:flex-row items-center"
       style={{
-        background: 'linear-gradient(to top, #D0DDD7 0%, #A5AE9E 100%)',
+        backgroundColor: '#7E846B', 
+        color: '#D0DDD7', 
       }}
     >
-      {/* Static wave on top */}
+      {/* Decorative wave in the background */}
       <div className="absolute inset-0 overflow-hidden z-0 wave-container">
         <svg
           className="w-full h-full wave-animation"
@@ -56,45 +86,74 @@ const Hero = () => {
         </svg>
       </div>
 
-      {/* Content Container */}
       <div className="container mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center">
-        {/* Text Content */}
-        <div className="flex-1 text-center md:text-left px-6">
-          <div className="relative bg-black bg-opacity-50 rounded-lg p-6 inline-block max-w-3xl">
-            <h2 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight text-white">
-              Discover the World of <span className="text-accent">Dad Hats</span>
+        {/* Text content about hats */}
+        <motion.div
+          className="flex-1 text-center md:text-left px-6 mb-12 md:mb-0"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          <div
+            className="relative rounded-lg p-6 inline-block max-w-3xl"
+            style={{
+              backgroundColor: 'rgba(0,0,0,0.4)',
+            }}
+          >
+            <h2
+              className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight"
+              style={{ color: '#D0DDD7' }}
+            >
+              Discover the World of{' '}
+              <span style={{ color: '#D0DDD7', textDecoration: 'underline' }}>
+                Dad Hats
+              </span>
             </h2>
-            <p className="text-lg md:text-xl text-gray-200 mb-8">
+            <p
+              className="text-lg md:text-xl mb-8"
+              style={{ color: '#D0DDD7' }}
+            >
               Simple, stylish, and crafted just for you. Find the perfect hat to complete your look.
             </p>
             <a
               href="/shop"
-              className="inline-block px-8 py-3 md:px-12 md:py-4 text-white border-2 border-primary font-bold rounded-full shadow-lg bg-secondary hover:bg-primary hover:text-background transition-all duration-300"
+              className="inline-block px-8 py-3 md:px-12 md:py-4 font-bold rounded-full shadow-lg transition-all duration-300"
+              style={{
+                backgroundColor: '#D0DDD7',
+                color: '#1C1C1B',
+                border: '2px solid #D0DDD7', 
+              }}
             >
               Shop Now
             </a>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Product Viewer */}
+        {/* Product viewer area */}
         {currentProduct && (
-          <div className="flex-1 flex flex-col items-center mt-12 md:mt-0 relative">
+          <motion.div
+            className="flex-1 flex flex-col items-center relative"
+            initial="hidden"
+            animate="visible"
+            variants={productVariants}
+          >
             <div className="relative group w-full max-w-md">
-              {/* Arrows */}
+              {/* Previous Product Button */}
               <button
                 onClick={handlePrevProduct}
                 className="absolute -left-10 top-1/2 transform -translate-y-1/2 bg-black text-white p-3 rounded-full shadow-lg hover:bg-gray-700 transition-all duration-300"
               >
-                &#8249; {/* Left arrow */}
+                &#8249;
               </button>
+              {/* Next Product Button */}
               <button
                 onClick={handleNextProduct}
                 className="absolute -right-10 top-1/2 transform -translate-y-1/2 bg-black text-white p-3 rounded-full shadow-lg hover:bg-gray-700 transition-all duration-300"
               >
-                &#8250; {/* Right arrow */}
+                &#8250;
               </button>
 
-              {/* Product Image with Overlay */}
+              {/* Product image */}
               <div className="relative overflow-hidden rounded-lg shadow-lg group transition-all duration-500 ease-in-out">
                 <img
                   src={currentProduct.thumbnail_url || 'https://via.placeholder.com/300'}
@@ -104,15 +163,24 @@ const Hero = () => {
                 <div
                   className="absolute inset-0 bg-black bg-opacity-10 group-hover:bg-opacity-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 ease-in-out"
                 >
-                  {/* Button and Name/Price */}
-                  <div className="text-center p-4 bg-white bg-opacity-90 rounded-lg shadow-lg">
-                    <h3 className="text-lg font-bold text-[#2F2504] mb-2">{currentProduct.name}</h3>
-                    <p className="text-xl font-semibold text-[#2F2504] mb-4">
+                  <div
+                    className="text-center p-4 rounded-lg shadow-lg"
+                    style={{
+                      backgroundColor: 'rgba(208,221,215,0.9)', 
+                      color: '#1C1C1B', 
+                    }}
+                  >
+                    <h3 className="text-lg font-bold mb-2">{currentProduct.name}</h3>
+                    <p className="text-xl font-semibold mb-4">
                       ${(currentProduct.price / 100).toFixed(2)}
                     </p>
                     <a
                       href={`/product/${currentProduct.id}`}
-                      className="px-8 py-3 text-white bg-primary font-bold rounded-full shadow-lg hover:bg-accent transition-all duration-300"
+                      className="px-8 py-3 font-bold rounded-full shadow-lg transition-all duration-300"
+                      style={{
+                        backgroundColor: '#7E846B',
+                        color: '#D0DDD7',
+                      }}
                     >
                       View Product
                     </a>
@@ -120,16 +188,15 @@ const Hero = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
 
-      {/* Animations */}
       <style>
         {`
-        .group:hover .text-center {
-          transform: translateY(-30px);
-        }
+          .group:hover .text-center {
+            transform: translateY(-30px);
+          }
         `}
       </style>
     </section>
