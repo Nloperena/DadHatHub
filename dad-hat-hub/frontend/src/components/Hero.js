@@ -126,7 +126,7 @@ const Hero = () => {
               className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight"
               style={{ color: '#D0DDD7' }}
             >
-              Discover the World of{' '}
+              Simple, Minimal, Stylish  {' '}
               <span style={{ color: '#D0DDD7', textDecoration: 'underline' }}>
                 Dad Hats
               </span>
@@ -135,7 +135,7 @@ const Hero = () => {
               className="text-lg md:text-xl mb-8"
               style={{ color: '#D0DDD7' }}
             >
-              Simple, stylish, and crafted just for you. Find the perfect hat to complete your look.
+              Your go-to destination for minimalist hats that blend style and personality effortlessly.
             </p>
             <a
               href="/shop"
