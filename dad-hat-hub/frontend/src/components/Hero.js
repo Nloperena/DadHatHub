@@ -1,10 +1,11 @@
 // src/components/Hero.js
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Hero = () => {
   const [products, setProducts] = useState([]);
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
+  const [isImageLoaded, setIsImageLoaded] = useState(false); // Track when image has loaded
 
   useEffect(() => {
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -29,10 +30,12 @@ const Hero = () => {
 
   const handlePrevProduct = () => {
     setCurrentProductIndex((prev) => (prev - 1 + products.length) % products.length);
+    setIsImageLoaded(false); // Reset loading state when product changes
   };
 
   const handleNextProduct = () => {
     setCurrentProductIndex((prev) => (prev + 1) % products.length);
+    setIsImageLoaded(false); // Reset loading state when product changes
   };
 
   const currentProduct = products[currentProductIndex];
@@ -45,7 +48,7 @@ const Hero = () => {
       y: 0,
       transition: {
         duration: 0.8,
-        ease: [0.25, 0.1, 0.25, 1] // Cubic-bezier for smooth easing
+        ease: [0.25, 0.1, 0.25, 1]
       }
     }
   };
@@ -59,6 +62,25 @@ const Hero = () => {
         duration: 0.8,
         ease: [0.25, 0.1, 0.25, 1],
         delay: 0.2
+      }
+    }
+  };
+
+  // Loading placeholder variants
+  const loadingVariants = {
+    initial: { opacity: 0 },
+    animate: { 
+      opacity: 1, 
+      transition: { 
+        duration: 0.5,
+        ease: 'easeOut'
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      transition: { 
+        duration: 0.5,
+        ease: 'easeIn'
       }
     }
   };
@@ -153,13 +175,35 @@ const Hero = () => {
                 &#8250;
               </button>
 
-              {/* Product image */}
               <div className="relative overflow-hidden rounded-lg shadow-lg group transition-all duration-500 ease-in-out">
+                
+                {/* Image Loading State */}
+                <AnimatePresence>
+                  {!isImageLoaded && (
+                    <motion.div
+                      className="absolute inset-0"
+                      variants={loadingVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      style={{
+                        background: 'linear-gradient(90deg, rgba(208,221,215,0.2) 0%, rgba(208,221,215,0.5) 50%, rgba(208,221,215,0.2) 100%)',
+                        backgroundSize: '200% 100%',
+                        animation: 'shimmer 1.5s infinite',
+                      }}
+                    ></motion.div>
+                  )}
+                </AnimatePresence>
+
                 <img
                   src={currentProduct.thumbnail_url || 'https://via.placeholder.com/300'}
                   alt={currentProduct.name}
-                  className="max-w-full h-auto object-contain"
+                  className={`max-w-full h-auto object-contain transition-opacity duration-500 ease-in-out ${
+                    isImageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  onLoad={() => setIsImageLoaded(true)}
                 />
+
                 <div
                   className="absolute inset-0 bg-black bg-opacity-10 group-hover:bg-opacity-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 ease-in-out"
                 >
@@ -196,6 +240,11 @@ const Hero = () => {
         {`
           .group:hover .text-center {
             transform: translateY(-30px);
+          }
+
+          @keyframes shimmer {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
           }
         `}
       </style>
