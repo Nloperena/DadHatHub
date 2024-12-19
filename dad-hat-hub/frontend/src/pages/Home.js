@@ -5,6 +5,7 @@ import FeaturedProducts from '../components/FeaturedProducts';
 import Testimonials from '../components/Testimonials';
 import RelatedProducts from '../components/RelatedProducts';
 import AboutSection from '../components/AboutSection';
+import HatFeaturesSection from '../components/HatFeaturesSection';
 
 const Home = () => {
   return (
@@ -15,7 +16,7 @@ const Home = () => {
       {/* About Section */}
       
         <AboutSection />
-      
+      <HatFeaturesSection />
 
       {/* Featured Products Section */}
       
