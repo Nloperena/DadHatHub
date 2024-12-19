@@ -99,7 +99,6 @@ const ShopPage = () => {
       {/* Header Section */}
       <section className="relative overflow-hidden py-8 md:py-12 flex flex-col items-center">
         <div className="absolute inset-0 -z-10">
-          {/* Add your SVG background here if desired */}
         </div>
 
         <div className="text-center px-6">
@@ -107,7 +106,7 @@ const ShopPage = () => {
             Welcome to Our <span className="text-accent">Shop</span>
           </h1>
           <p className="text-lg md:text-xl max-w-3xl mx-auto mb-6 md:mb-8">
-            Explore our exclusive collection of hats crafted just for you.
+          Explore our stylish, minimalist hats—search to find designs with the elements you love!
           </p>
         </div>
       </section>
