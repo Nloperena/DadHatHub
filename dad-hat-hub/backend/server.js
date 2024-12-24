@@ -3,6 +3,7 @@ const axios = require('axios');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const stripe = require('stripe');
+const { xmlBuilder } = require('xmlbuilder2'); // For generating XML
 
 // Load environment variables
 dotenv.config();
@@ -27,17 +28,14 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
  * Webhook endpoint to handle Stripe events.
  * Must be defined before body parsing middleware.
  */
-// Webhook endpoint
 app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
   const sig = req.headers['stripe-signature'];
 
   let event;
   try {
-    // Validate and construct the Stripe event
     event = stripeClient.webhooks.constructEvent(req.body, sig, endpointSecret);
     console.log('Webhook Verified:', event);
 
-    // Handle specific event types
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       console.log('Payment successful:', session);
@@ -54,12 +52,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
 });
 
 // Apply JSON parsing middleware only AFTER the webhook route
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-
-
-// Apply body parsing middleware for other routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -121,19 +113,19 @@ app.get('/api/products/:id', async (req, res) => {
     const product = response.data.result;
 
     const productDetails = {
-      id: product.sync_product.id, // Correctly map product ID
-      name: product.sync_product.name, // Correctly map product name
+      id: product.sync_product.id,
+      name: product.sync_product.name,
       description: product.sync_product.description || 'No description available',
       thumbnail_url: product.sync_product.thumbnail_url,
       variants: product.sync_variants.map((variant) => ({
         id: variant.id,
-        name: variant.name, // Only variant name
+        name: variant.name,
         price: parseFloat(variant.retail_price) * 100,
         thumbnail_url: variant.files?.find((file) => file.type === 'preview')?.preview_url || null,
       })),
     };
 
-    console.log('Processed Product Details:', productDetails); // Debug log
+    console.log('Processed Product Details:', productDetails);
     res.status(200).json(productDetails);
   } catch (error) {
     console.error(`Error fetching product with ID ${productId}:`, error.message);
@@ -180,10 +172,53 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
     res.status(200).json({ id: session.id });
   } catch (error) {
     console.error('Stripe Checkout Session Error:', error);
-    res.status(500).json({
-      error: 'Failed to create Stripe session.',
-      details: error.message,
+    res.status(500).json({ error: 'Failed to create Stripe session.' });
+  }
+});
+
+/**
+ * Generate Sitemap
+ */
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const response = await axios.get('https://api.printful.com/store/products', {
+      headers: { Authorization: `Bearer ${PRINTFUL_API_KEY}` },
     });
+
+    const productUrls = response.data.result.map((product) => ({
+      loc: `/product/${product.id}`,
+      priority: 0.9,
+      changefreq: 'weekly',
+    }));
+
+    const staticPages = [
+      { loc: '/', priority: 1.0, changefreq: 'daily' },
+      { loc: '/shop', priority: 0.8, changefreq: 'daily' },
+      { loc: '/checkout', priority: 0.5, changefreq: 'never' },
+      { loc: '/success', priority: 0.5, changefreq: 'never' },
+      { loc: '/failure', priority: 0.5, changefreq: 'never' },
+    ];
+
+    const urls = [...staticPages, ...productUrls];
+
+    const urlset = {
+      urlset: {
+        '@xmlns': 'http://www.sitemaps.org/schemas/sitemap/0.9',
+        url: urls.map((url) => ({
+          loc: `${process.env.BASE_URL}${url.loc}`,
+          priority: url.priority,
+          changefreq: url.changefreq,
+        })),
+      },
+    };
+
+    const sitemap = xmlBuilder.create(urlset).end({ prettyPrint: true });
+
+    res.setHeader('Content-Type', 'application/xml');
+    res.send(sitemap);
+  } catch (error) {
+    console.error('Error generating sitemap:', error.message);
+    res.status(500).json({ error: 'Failed to generate sitemap.' });
   }
 });
 
@@ -192,58 +227,27 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
  */
 async function handleCheckoutSessionCompleted(session) {
   try {
-    const checkoutSession = await stripeClient.checkout.sessions.retrieve(session.id, {
-      expand: ['line_items.data.price.product'],
-    });
-
-    const orderItems = checkoutSession.line_items.data
-      .map((item) => {
-        const variantId = item.price.product.metadata.variant_id;
-        const productId = item.price.product.metadata.product_id;
-
-        if (!variantId || !productId) {
-          console.error('Missing variant_id or product_id for item:', item);
-          return null;
-        }
-        return {
-          sync_variant_id: variantId,
-          quantity: item.quantity,
-        };
-      })
-      .filter(Boolean);
-
-    if (orderItems.length === 0) {
-      throw new Error('No valid items for Printful order.');
-    }
-
-    if (!session.customer_details) {
-      throw new Error('Missing customer details in session.');
-    }
-
     const orderData = {
       recipient: {
-        name: session.customer_details.name || 'No Name',
+        name: session.customer_details.name,
         address1: session.customer_details.address.line1,
         city: session.customer_details.address.city,
         state_code: session.customer_details.address.state,
         country_code: session.customer_details.address.country,
         zip: session.customer_details.address.postal_code,
         email: session.customer_email,
-        phone: session.customer_details.phone || '',
       },
-      items: orderItems,
+      items: session.display_items.map((item) => ({
+        sync_variant_id: item.custom.metadata.variant_id,
+        quantity: item.quantity,
+      })),
     };
 
-    const response = await axios.post('https://api.printful.com/orders', orderData, {
-      headers: {
-        Authorization: `Bearer ${PRINTFUL_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
+    await axios.post('https://api.printful.com/orders', orderData, {
+      headers: { Authorization: `Bearer ${PRINTFUL_API_KEY}` },
     });
-
-    console.log('Printful order response:', response.data);
   } catch (error) {
-    console.error('Error handling checkout session:', error.response?.data || error.message);
+    console.error('Error handling checkout session:', error.message);
   }
 }
 
