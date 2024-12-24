@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { FaShoppingCart } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import CartDrawer from './CartDrawer';
+import logo from '../assets/logo512.png'; // Path to your logo
 
 const Navbar = () => {
   const { cart } = useCart();
@@ -19,7 +20,6 @@ const Navbar = () => {
     setIsCartOpen(!isCartOpen);
   };
 
-  // Generate star data for the background
   const generateStars = (count) =>
     Array.from({ length: count }).map((_, i) => ({
       id: i,
@@ -34,12 +34,10 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Sticky Navbar */}
       <nav
         className="fixed top-0 left-0 w-full bg-[#2F2504] text-[#D0DDD7] p-4 flex justify-between items-center shadow-lg z-[2147483647] overflow-hidden"
         style={{ background: 'radial-gradient(circle at top, #2F2504, #1a202c)' }}
       >
-        {/* Twinkling Stars */}
         {stars.map((star) => (
           <motion.div
             key={`star-${star.id}`}
@@ -67,12 +65,17 @@ const Navbar = () => {
           </motion.div>
         ))}
 
-        <div className="font-bold text-xl md:text-2xl lg:text-3xl">
-          <Link
-            to="/"
-            className="hover:text-[#8EF9F3] transition-colors duration-300"
-          >
-            Dad Hat Hub
+        {/* Logo Section */}
+        <div>
+          <Link to="/">
+            <img
+              src={logo}
+              alt="Dad Hat Hub Logo"
+              className="h-24 w-auto invert filter drop-shadow-lg"
+              style={{
+                filter: 'invert(1) drop-shadow(0 0 10px rgba(255, 255, 255, 0.7))',
+              }}
+            />
           </Link>
         </div>
 
@@ -80,24 +83,27 @@ const Navbar = () => {
         <div className="hidden md:flex space-x-8 items-center">
           <Link
             to="/"
-            className="hover:text-[#8EF9F3] transition-colors duration-300"
+            className="hover:text-[#8EF9F3] transition-colors duration-300 animate-glow text-3xl" // 2.3x larger
           >
             Home
           </Link>
           <Link
             to="/shop"
-            className="hover:text-[#8EF9F3] transition-colors duration-300"
+            className="hover:text-[#8EF9F3] transition-colors duration-300 animate-glow text-3xl" // 2.3x larger
           >
             Shop
           </Link>
           <Link
             to="/checkout"
-            className="hover:text-[#8EF9F3] transition-colors duration-300"
+            className="hover:text-[#8EF9F3] transition-colors duration-300 animate-glow text-3xl" // 2.3x larger
           >
             Checkout
           </Link>
-          <button onClick={toggleCart} className="relative focus:outline-none">
-            <FaShoppingCart size={24} />
+          <button
+            onClick={toggleCart}
+            className="relative focus:outline-none animate-glow text-3xl" // 2.3x larger
+          >
+            <FaShoppingCart size={56} /> {/* 2.3x larger than before */}
             {cartItemCount > 0 && (
               <span className="absolute -top-2 -right-4 bg-[#8EF9F3] text-[#2F2504] text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
                 {cartItemCount}
@@ -108,8 +114,11 @@ const Navbar = () => {
 
         {/* Mobile Cart Icon and Menu Icon */}
         <div className="md:hidden flex items-center space-x-4">
-          <button onClick={toggleCart} className="relative focus:outline-none">
-            <FaShoppingCart size={24} />
+          <button
+            onClick={toggleCart}
+            className="relative focus:outline-none animate-glow text-3xl" // 2.3x larger
+          >
+            <FaShoppingCart size={56} /> {/* 2.3x larger */}
             {cartItemCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-[#8EF9F3] text-[#2F2504] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 {cartItemCount}
@@ -130,21 +139,21 @@ const Navbar = () => {
             <Link
               to="/"
               onClick={toggleMobileMenu}
-              className="hover:text-[#8EF9F3] transition-colors duration-300"
+              className="hover:text-[#8EF9F3] transition-colors duration-300 animate-glow text-3xl" // 2.3x larger
             >
               Home
             </Link>
             <Link
               to="/shop"
               onClick={toggleMobileMenu}
-              className="hover:text-[#8EF9F3] transition-colors duration-300"
+              className="hover:text-[#8EF9F3] transition-colors duration-300 animate-glow text-3xl" // 2.3x larger
             >
               Shop
             </Link>
             <Link
               to="/checkout"
               onClick={toggleMobileMenu}
-              className="hover:text-[#8EF9F3] transition-colors duration-300"
+              className="hover:text-[#8EF9F3] transition-colors duration-300 animate-glow text-3xl" // 2.3x larger
             >
               Checkout
             </Link>
@@ -152,10 +161,7 @@ const Navbar = () => {
         )}
       </nav>
 
-      {/* Cart Drawer */}
       <CartDrawer isOpen={isCartOpen} toggleCart={toggleCart} />
-
-      {/* Adding padding to the top of the content so it doesn't get hidden behind the sticky navbar */}
       <div className="pt-16"></div>
     </>
   );
